@@ -1,5 +1,6 @@
 /*
-
+** Create an object to store player information like:
+** name, symbol
 */
 
 const GameBoard = (function () {
@@ -22,3 +23,9 @@ const GameBoard = (function () {
 
     return { getBoard }
 }) ();
+
+function createPlayer (name) {
+    const playerName = "Player " + name;
+
+    return { name, playerName }
+}
