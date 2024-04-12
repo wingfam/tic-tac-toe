@@ -20,9 +20,5 @@ const GameBoard = (function () {
 
     const getBoard = () => board;
 
-    const printBoard = () => {
-        console.log(board);
-    };
-
-    return { getBoard, printBoard }
+    return { getBoard }
 }) ();
