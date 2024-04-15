@@ -8,7 +8,7 @@ TODO:
 4. [X] Create a function that switch player's turn.
 5. [X] Create a factory function to keep track of each cell on the gameboard (which cell
    has symbol of which player on and which cell hasn't).
-6. [] Create a GameController factory function that responsible for controlling the 
+6. [X] Create a GameController factory function that responsible for controlling the 
    flow and state of the game's turn.
 7. [] Implement a win condition after 3 round that check each player total score, 
    then give a winning message to whoever has the highest score. 
@@ -64,25 +64,44 @@ function createPlayer(name, symbol) {
     return { name, symbol, getScore, giveScore };
 }
 
-function switchPlayerTurn (activePlayer) {
-    if (activePlayer === player1) {
-        activePlayer = player2;
-    } else {
-        activePlayer = player1;
+
+function GameController(playerOneName, playerTwoName) {
+    const board = GameBoard;
+
+    const player1 = createPlayer(playerOneName, "X");
+    const player2 = createPlayer(playerTwoName, "O");
+
+    let currentPlayer = player1;
+
+    const getCurrentPlayer = () => currentPlayer;
+
+    const switchPlayerTurn = () => {
+        if (currentPlayer.name === player1.name) {
+            currentPlayer = player2;
+        } else {
+            currentPlayer = player1;
+        }
+    
+        return currentPlayer;
+    }
+    
+    const printRoundMessage = () => {
+        console.log(`Now it's ${currentPlayer.name}'s turn`);
+        console.log("Select a cell to place your symbol");
+        board.printBoard();
+    } 
+
+    const playOneRound = (currentPlayer, row, column) => {
+        board.placeSymbol(currentPlayer.symbol, row, column);
+        console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
+
+        switchPlayerTurn();
+        printRoundMessage();
     }
 
-    return activePlayer;
+    printRoundMessage();
+    
+    return { player1, player2, playOneRound, getCurrentPlayer }
 }
 
-const board = GameBoard;
-
-const player1 = createPlayer("Minh", "X");
-const player2 = createPlayer("BOT", "O");
-
-let activePlayer = player1;
-
-console.log(`${activePlayer.name}'s turn`);
-
-console.log("Select a cell to place your symbol");
-
-board.printBoard();
+const game = GameController("Minh", "BOT");
