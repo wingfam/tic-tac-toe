@@ -30,6 +30,7 @@ const GameBoard = (function () {
         }
     }
 
+    const getColumn = () => column;
     const getBoard = () => board;
 
     const placeSymbol = (playerSymbol, row, column) => {
@@ -41,7 +42,7 @@ const GameBoard = (function () {
         console.log(boardWithCellValues);
     }
 
-    return { getBoard, placeSymbol, printBoard }
+    return { getColumn, getBoard, placeSymbol, printBoard }
 })();
 
 function Cell() {
@@ -64,7 +65,6 @@ function createPlayer(name, symbol) {
     return { name, symbol, getScore, giveScore };
 }
 
-
 function GameController(playerOneName, playerTwoName) {
     const board = GameBoard;
 
@@ -81,27 +81,49 @@ function GameController(playerOneName, playerTwoName) {
         } else {
             currentPlayer = player1;
         }
-    
+
         return currentPlayer;
     }
-    
+
     const printRoundMessage = () => {
         console.log(`Now it's ${currentPlayer.name}'s turn`);
         console.log("Select a cell to place your symbol");
         board.printBoard();
-    } 
+    }
+
+    const checkWinOneRound = () => {
+        // Check for each cell in a column if every symbol is the same.
+        
+    }
 
     const playOneRound = (currentPlayer, row, column) => {
         board.placeSymbol(currentPlayer.symbol, row, column);
         console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
+
+        // Check win condition here
 
         switchPlayerTurn();
         printRoundMessage();
     }
 
     printRoundMessage();
-    
-    return { player1, player2, playOneRound, getCurrentPlayer }
+
+    return { playOneRound, getCurrentPlayer }
 }
 
-const game = GameController("Minh", "BOT");
+// const game = GameController("Minh", "BOT");
+var two_d = [
+    ["X","O","X"],
+    ["O","X","X"],
+    ["X","X","X"]
+];
+
+const column = 3;
+for (let i = 0; i < column; i++) {
+    var col = two_d.map(function(value) { return value[i] });
+    isSame = col.every(function(value) { return value == "X" });
+    if (isSame) { 
+        console.log("Player X won!") 
+        break; 
+    }
+}
