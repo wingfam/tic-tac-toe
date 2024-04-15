@@ -14,116 +14,154 @@ TODO:
    then give a winning message to whoever has the highest score. 
 */
 
-const GameBoard = (function () {
-    const rows = 3;
-    const columns = 3;
-    let board = [];
-
-    for (let i = 0; i < rows; i++) {
-        // For each row, asign an empty array
-        // that represent a column.
-        board[i] = [];
-        for (let j = 0; j < columns; j++) {
-            // For each column in a row, add
-            // a cell to that column.
-            board[i].push(Cell());
-        }
-    }
-
-    const getColumn = () => column;
-    const getBoard = () => board;
-
-    const placeSymbol = (playerSymbol, row, column) => {
-        board[row][column].addSymbol(playerSymbol);
-    };
-
-    const printBoard = () => {
-        const boardWithCellValues = board.map((row) => row.map((cell) => cell.getValue()));
-        console.log(boardWithCellValues);
-    }
-
-    return { getColumn, getBoard, placeSymbol, printBoard }
-})();
-
 function Cell() {
-    let value = " ";
+  let value = " ";
 
-    const addSymbol = (playerSymbol) => {
-        value = value.replace(value, playerSymbol);
-    }
+  const addSymbol = (playerSymbol) => {
+    value = value.replace(value, playerSymbol);
+  };
 
-    const getValue = () => value;
+  const getValue = () => value;
 
-    return { addSymbol, getValue }
+  return { addSymbol, getValue };
 }
 
 function createPlayer(name, symbol) {
-    let score = 0;
-    const getScore = () => score;
-    const giveScore = () => score++;
+  let score = 0;
+  const getScore = () => score;
+  const giveScore = () => score++;
 
-    return { name, symbol, getScore, giveScore };
+  return { name, symbol, getScore, giveScore };
 }
 
+const GameBoard = (function () {
+  const rows = 3;
+  const columns = 3;
+  let board = [];
+
+  for (let i = 0; i < rows; i++) {
+    // For each row, asign an empty array
+    // that represent a column.
+    board[i] = [];
+    for (let j = 0; j < columns; j++) {
+      // For each column in a row, add
+      // a cell to that column.
+      board[i].push(Cell());
+    }
+  }
+
+  const getColumn = () => column;
+  const getBoard = () => board;
+
+  const placeSymbol = (playerSymbol, row, column) => {
+    board[row][column].addSymbol(playerSymbol);
+  };
+
+  const boardWithCellValues = board.map((row) =>
+    row.map((cell) => {
+      return cell.getValue();
+    })
+  );
+
+  const printBoard = () => {
+    console.log(boardWithCellValues);
+  };
+
+  return { getColumn, getBoard, placeSymbol, printBoard, boardWithCellValues };
+})();
+
 function GameController(playerOneName, playerTwoName) {
-    const board = GameBoard;
+  const board = GameBoard;
 
-    const player1 = createPlayer(playerOneName, "X");
-    const player2 = createPlayer(playerTwoName, "O");
+  const player1 = createPlayer(playerOneName, "X");
+  const player2 = createPlayer(playerTwoName, "O");
 
-    let currentPlayer = player1;
+  let currentPlayer = player1;
 
-    const getCurrentPlayer = () => currentPlayer;
+  const getCurrentPlayer = () => currentPlayer;
 
-    const switchPlayerTurn = () => {
-        if (currentPlayer.name === player1.name) {
-            currentPlayer = player2;
-        } else {
-            currentPlayer = player1;
-        }
-
-        return currentPlayer;
+  const switchPlayerTurn = () => {
+    if (currentPlayer.name === player1.name) {
+      currentPlayer = player2;
+    } else {
+      currentPlayer = player1;
     }
 
-    const printRoundMessage = () => {
-        console.log(`Now it's ${currentPlayer.name}'s turn`);
-        console.log("Select a cell to place your symbol");
-        board.printBoard();
-    }
+    return currentPlayer;
+  };
 
-    const checkWinOneRound = () => {
-        // Check for each cell in a column if every symbol is the same.
-        
-    }
+  const printRoundMessage = () => {
+    console.log(`Now it's ${currentPlayer.name}'s turn`);
+    console.log("Select a cell to place your symbol");
+    board.printBoard();
+  };
 
-    const playOneRound = (currentPlayer, row, column) => {
-        board.placeSymbol(currentPlayer.symbol, row, column);
-        console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
+  const checkWinOneRound = () => {
+    // Check for each cell in a column if every symbol is the same.
+  };
 
-        // Check win condition here
+  const playOneRound = (currentPlayer, row, column) => {
+    board.placeSymbol(currentPlayer.symbol, row, column);
+    console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
 
-        switchPlayerTurn();
-        printRoundMessage();
-    }
+    // Check win condition here
 
+    switchPlayerTurn();
     printRoundMessage();
+  };
 
-    return { playOneRound, getCurrentPlayer }
+  printRoundMessage();
+
+  return { playOneRound, getCurrentPlayer };
 }
 
 // const game = GameController("Minh", "BOT");
+
 var two_d = [
-    ["X","O","X"],
-    ["O","X","X"],
-    ["X","X","X"]
+  ["O", "X", "X"],
+  ["X", "X", "X"],
+  ["O", "X", "O"],
 ];
 
+/* Check for each cell in a row. Use every */
+const row = two_d.every((row) => { return row; })
+console.log(row)
+
+/*  Check for each cell in a column */
+const checkColumns = (totalColumn) => {
+  for (let i = 0; i < totalColumn; i++) {
+    isTrue = two_d
+      .map((row) => {
+        return row[i];
+      })
+      .every((cell) => {
+        return cell == "X";
+      });
+
+    if (isTrue) return true;
+  }
+};
+
 const column = 3;
-for (let i = 0; i < column; i++) {
-    var col = two_d.map(function(value) { return value[i] });
-    isSame = col.every(function(value) { return value == "X" });
-    if (isSame) { 
-        console.log("Player X won!") 
-        break; 
-    }
-}
+if (checkColumns(column)) console.log("Player won by column");
+
+
+/* Check each cell in a diagonal */
+// Diagonal from top left to bottom right
+var diagonal1 = two_d.map(function (cell, index) {
+  return cell[index]; // index increase for each subsequence loop
+});
+
+// Diagonal from bottom left to top right
+var diagonal2 = two_d.toReversed().map(function (cell, index) {
+  return cell[index];
+});
+
+console.log(`Diagonal 1: ${diagonal1}`);
+console.log(`Diagonal 2: ${diagonal2}`);
+
+const isSameSymbol = diagonal1.every(function (cell) {
+  return cell == "X";
+});
+
+if (isSameSymbol) console.log("Player won by diagonal");
