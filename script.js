@@ -10,10 +10,9 @@ TODO:
    has symbol of which player on and which cell hasn't).
 6. [X] Create a GameController factory function that responsible for controlling the 
    flow and state of the game's turn.
-7. [X] Implement a win condition after one round and give one score to winner. 
-7.1. [] Give board a blank slate after declare a winner of that round.
-8. [] After 3 round, declare winner of that match.
-9. [] Implement a tie condition after one round.
+7. [X] Implement a win condition and give one score to winner. 
+8. [] Give board a blank slate after declare a winner of that round.
+9. [] Implement a tie condition.
 */
 
 function Cell() {
@@ -158,69 +157,34 @@ function GameController(playerOneName, playerTwoName) {
   };
 
   const printRoundMessage = () => {
-    console.log("A new round has started.");
-    console.log(`Now it's ${currentPlayer.name}'s turn`);
+    console.log(`It's ${currentPlayer.name}'s turn`);
     board.printBoard();
-  };
-
-  const printMatchMessage = () => {
-    console.log("This is a 2 of out 3 Tic-Tac-Toe match.");
-    printRoundMessage();
-  };
-
-  const playMatch = () => {
-    let currentRound = 0;
-    do {
-      // TODO: Find a way to implement invoke playing one round
-      // inside this do while loop.
-      playOneRound();
-      currentRound++;
-    } while (currentRound < totalRoundPlay);
-
-    const winner = checkPlayerWinAMatch(player1, player2);
-    console.log(`Congratulation! ${winner} has won the match.`);
   };
 
   function playOneRound() {
     let winOneCondition = false;
 
-    do {
-      let inputRow = prompt("Type row you want to place your symbol.");
-      let inputCol = prompt("Type column you want to place your symbol.");
+    // let inputRow = prompt("Type row you want to place your symbol.");
+    // let inputCol = prompt("Type column you want to place your symbol.");
 
-      board.placeSymbol(currentPlayer.symbol, inputRow, inputCol);
-      console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
-      winOneCondition = checkWinOneRound(currentPlayer.symbol, board);
+    board.placeSymbol(currentPlayer.symbol, inputRow, inputCol);
+    console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
+    winOneCondition = checkWinOneRound(currentPlayer.symbol, board);
 
-      if (winOneCondition) {
-        board.printBoard();
-        currentPlayer.giveScore();
-        console.log(`${currentPlayer.name} has won this round!`);
-        console.log(
-          `${currentPlayer.name}'s total score is: ${currentPlayer.getScore()}`
-        );
-      } else {
-        switchPlayerTurn();
-        board.printBoard();
-        console.log(`It's ${currentPlayer.name}'s turn`);
-      }
-    } while (winOneCondition === false);
-
-    switchPlayerTurn();
-    printRoundMessage();
+    if (winOneCondition) {
+      board.printBoard();
+      currentPlayer.giveScore();
+      console.log(`${currentPlayer.name} has won!`);
+      console.log(`${currentPlayer.name}'s total score is: ${currentPlayer.getScore()}`);
+    } else {
+      switchPlayerTurn();
+      printRoundMessage();
+    }
   }
 
-  printMatchMessage();
+  printRoundMessage();
 
   return { getCurrentPlayer, playOneRound, playMatch };
 }
 
 const game = GameController("Minh", "BOT");
-game.playMatch();
-
-// First round: Minh won
-// game.playOneRound(0, 0);
-// game.playOneRound(1, 0);
-// game.playOneRound(0, 1);
-// game.playOneRound(1, 1);
-// game.playOneRound(0, 2);
