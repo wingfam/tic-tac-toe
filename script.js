@@ -34,6 +34,46 @@ function createPlayer(name, symbol) {
   return { name, symbol, getScore, giveScore };
 }
 
+function checkWinOneRound(playerSymbol, totalCol) {
+  const compareSymbol = (value) => value === playerSymbol;
+
+  /* Check for each cell in a row. Use every */
+  const checkRow = () => {
+    for (let row of two_d) {
+      const isTrue = row.every(compareSymbol);
+      if (isTrue) { return true };
+    }
+  }
+
+  /*  Check for each cell in a column */
+  const checkColumn = () => {
+    for (let i = 0; i < totalCol; i++) {
+      const col = two_d.map((cell) => { return cell[i] });
+      const isTrue = col.every(compareSymbol);
+      if (isTrue) { return true };
+    }
+  }
+
+  /* Check each cell in a diagonal */
+  const checkDiagonal = () => {
+    // Diagonal from top left to bottom right
+    const isLinearTrue = two_d.map(function (cell, index) {
+      return cell[index]; // index increase for each subsequence loop
+    }).every((value) => value === "X");
+
+    // Diagonal from bottom left to top right
+    const isReverseTrue = two_d.toReversed().map(function (cell, index) {
+      return cell[index];
+    }).every((value) => value === "X");
+
+    if (isLinearTrue || isReverseTrue) { return true };
+  }
+
+  return { checkRow, checkColumn, checkDiagonal }
+}
+
+const winCondition = checkWinOneRound("X", 3);
+
 const GameBoard = (function () {
   const rows = 3;
   const columns = 3;
@@ -97,6 +137,7 @@ function GameController(playerOneName, playerTwoName) {
   };
 
   const checkWinOneRound = () => {
+    const compareSymbol = (value) => value === currentPlayer.symbol;
     // Check for each cell in a column if every symbol is the same.
   };
 
@@ -105,9 +146,12 @@ function GameController(playerOneName, playerTwoName) {
     console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
 
     // Check win condition here
-
-    switchPlayerTurn();
-    printRoundMessage();
+    if (checkWinOneRound()) {
+      console.log(`Player ${currentPlayer.name} has won this round!`);
+    } else {
+      switchPlayerTurn();
+      printRoundMessage();
+    }
   };
 
   printRoundMessage();
@@ -117,51 +161,4 @@ function GameController(playerOneName, playerTwoName) {
 
 // const game = GameController("Minh", "BOT");
 
-var two_d = [
-  ["O", "X", "X"],
-  ["X", "X", "X"],
-  ["O", "X", "O"],
-];
 
-/* Check for each cell in a row. Use every */
-const row = two_d.every((row) => { return row; })
-console.log(row)
-
-/*  Check for each cell in a column */
-const checkColumns = (totalColumn) => {
-  for (let i = 0; i < totalColumn; i++) {
-    isTrue = two_d
-      .map((row) => {
-        return row[i];
-      })
-      .every((cell) => {
-        return cell == "X";
-      });
-
-    if (isTrue) return true;
-  }
-};
-
-const column = 3;
-if (checkColumns(column)) console.log("Player won by column");
-
-
-/* Check each cell in a diagonal */
-// Diagonal from top left to bottom right
-var diagonal1 = two_d.map(function (cell, index) {
-  return cell[index]; // index increase for each subsequence loop
-});
-
-// Diagonal from bottom left to top right
-var diagonal2 = two_d.toReversed().map(function (cell, index) {
-  return cell[index];
-});
-
-console.log(`Diagonal 1: ${diagonal1}`);
-console.log(`Diagonal 2: ${diagonal2}`);
-
-const isSameSymbol = diagonal1.every(function (cell) {
-  return cell == "X";
-});
-
-if (isSameSymbol) console.log("Player won by diagonal");
