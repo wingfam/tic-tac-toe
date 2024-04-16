@@ -176,12 +176,12 @@ function GameController(playerOneName, playerTwoName) {
 
 const game = GameController("Minh", "BOT");
 
-game.playOneRound(1, 0);
-game.playOneRound(1, 1);
-game.playOneRound(0, 1);
-game.playOneRound(0, 0);
-game.playOneRound(2, 2);
-game.playOneRound(0, 2);
-game.playOneRound(2, 0);
-game.playOneRound(1, 2);
-game.playOneRound(2, 1);
+// game.playOneRound(1, 0);
+// game.playOneRound(1, 1);
+// game.playOneRound(0, 1);
+// game.playOneRound(0, 0);
+// game.playOneRound(2, 2);
+// game.playOneRound(0, 2);
+// game.playOneRound(2, 0);
+// game.playOneRound(1, 2);
+// game.playOneRound(2, 1);
