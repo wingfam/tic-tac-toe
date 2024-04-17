@@ -11,15 +11,19 @@ TODO:
 6. [X] Create a GameController factory function that responsible for controlling the 
    flow and state of the game's turn.
 7. [X] Implement a win condition and give one score to winner. 
-8. [] Give board a blank slate after declare a winner of that round.
-9. [] Implement a tie condition.
+8. [X] Give board a blank slate after declare a winner of that round.
+9. [X] Implement a tie condition.
 */
 
 function Cell() {
   let value = " ";
-  const addSymbol = (playerSymbol) =>
-    (value = value.replace(value, playerSymbol));
+
+  function addSymbol(playerSymbol) {
+    value = value.replace(value, playerSymbol);
+  }
+
   const getValue = () => value;
+
   return { addSymbol, getValue };
 }
 
@@ -30,78 +34,14 @@ function createPlayer(name, symbol) {
   return { name, symbol, getScore, giveScore };
 }
 
-function checkWinOneRound(playerSymbol, board) {
-  let isWin = false;
-  const totalCol = board.getColumn();
-  const boardWithValues = board.getBoardWithValues();
-
-  const compareSymbol = (value) => value === playerSymbol;
-
-  /* Check for each cell in a row. Use every */
-  const checkRow = () => {
-    for (let row of boardWithValues) {
-      const isTrue = row.every(compareSymbol);
-      if (isTrue) {
-        return true;
-      }
-    }
-  };
-
-  /*  Check for each cell in a column */
-  const checkColumn = () => {
-    for (let i = 0; i < totalCol; i++) {
-      const col = boardWithValues.map((cell) => {
-        return cell[i];
-      });
-      const isTrue = col.every(compareSymbol);
-      if (isTrue) {
-        return true;
-      }
-    }
-  };
-
-  /* Check each cell in a diagonal */
-  const checkDiagonal = () => {
-    // Diagonal from top left to bottom right
-    const isLinearTrue = boardWithValues
-      .map(function (cell, index) {
-        return cell[index]; // index increase for each subsequence loop
-      })
-      .every(compareSymbol);
-
-    // Diagonal from bottom left to top right
-    const isReverseTrue = boardWithValues
-      .toReversed()
-      .map(function (cell, index) {
-        return cell[index];
-      })
-      .every(compareSymbol);
-
-    if (isLinearTrue || isReverseTrue) {
-      return true;
-    }
-  };
-
-  if (checkRow() || checkColumn() || checkDiagonal()) {
-    isWin = true;
-  }
-
-  return isWin;
-}
-
-function checkPlayerWinAMatch(player1, player2) {
-  const playerOneScore = player1.getScore();
-  const playerTwoScore = player2.getScore();
-  if (playerOneScore > playerTwoScore) return player1.name;
-  if (playerOneScore < playerTwoScore) return player2.name;
-}
-
 const GameBoard = (function () {
   const rows = 3;
   const columns = 3;
+  const maximumPlacement = rows * columns;
   let board = [];
 
   const getColumn = () => columns;
+  const getMaxPlacement = () => maximumPlacement;
   const getBoard = () => board;
 
   for (let i = 0; i < rows; i++) {
@@ -130,52 +70,125 @@ const GameBoard = (function () {
 
   const placeSymbol = (playerSymbol, row, column) => {
     board[row][column].addSymbol(playerSymbol);
+    console.log(`Player ${activePlayer.name}'s symbol has been placed`);
   };
 
-  return { getColumn, getBoard, placeSymbol, printBoard, getBoardWithValues };
+  function clearBoard() {
+    board.forEach((row) => {
+      row.forEach((cell) => {
+        cell.addSymbol(" ");
+      });
+    });
+  }
+
+  return {
+    getColumn,
+    getBoard,
+    placeSymbol,
+    printBoard,
+    getBoardWithValues,
+    clearBoard,
+    getMaxPlacement,
+  };
 })();
 
 function GameController(playerOneName, playerTwoName) {
   const board = GameBoard;
-  const totalRoundPlay = 3;
-
   const player1 = createPlayer(playerOneName, "X");
   const player2 = createPlayer(playerTwoName, "O");
 
-  let currentPlayer = player1;
+  let numberOfPlacement = 0;
+  let activePlayer = player1;
 
-  const getCurrentPlayer = () => currentPlayer;
+  const getCurrentPlayer = () => activePlayer;
 
   const switchPlayerTurn = () => {
-    if (currentPlayer.name === player1.name) {
-      currentPlayer = player2;
-    } else {
-      currentPlayer = player1;
-    }
-
-    return currentPlayer;
+    activePlayer.name === player1.name
+      ? (activePlayer = player2)
+      : (activePlayer = player1);
+    return activePlayer;
   };
 
   const printRoundMessage = () => {
-    console.log(`It's ${currentPlayer.name}'s turn`);
+    console.log(`It's ${activePlayer.name}'s turn`);
     board.printBoard();
   };
 
-  function playOneRound() {
-    let winOneCondition = false;
+  const resetGame = () => {
+    console.log("A new round has started.");
+    board.clearBoard();
+    printRoundMessage();
+  };
 
-    // let inputRow = prompt("Type row you want to place your symbol.");
-    // let inputCol = prompt("Type column you want to place your symbol.");
+  function checkWinCondition(playerSymbol, board) {
+    let isWin = false;
+    const totalCol = board.getColumn();
+    const boardWithValues = board.getBoardWithValues();
 
-    board.placeSymbol(currentPlayer.symbol, inputRow, inputCol);
-    console.log(`Player ${currentPlayer.name}'s symbol has been placed`);
-    winOneCondition = checkWinOneRound(currentPlayer.symbol, board);
+    const compareSymbol = (value) => value === playerSymbol;
 
-    if (winOneCondition) {
+    /* Check for each cell in a row. Use every */
+    function checkRow() {
+      for (let row of boardWithValues) {
+        if (row.every(compareSymbol)) return true;
+        else return false;
+      }
+    }
+
+    /*  Check for each cell in a column */
+    function checkColumn() {
+      for (let i = 0; i < totalCol; i++) {
+        const col = boardWithValues.map((cell) => {
+          return cell[i];
+        });
+
+        if (col.every(compareSymbol)) return true;
+        else return false;
+      }
+    }
+
+    /* Check each cell in a diagonal */
+    function checkDiagonal() {
+      // Diagonal from top left to bottom right
+      const isLinearTrue = boardWithValues
+        .map(function (cell, index) {
+          return cell[index]; // index increase for each subsequence loop
+        })
+        .every(compareSymbol);
+
+      // Diagonal from bottom left to top right
+      const isReverseTrue = boardWithValues
+        .toReversed()
+        .map(function (cell, index) {
+          return cell[index];
+        })
+        .every(compareSymbol);
+
+      isLinearTrue || isReverseTrue ? true : false;
+    }
+
+    if (checkRow() || checkColumn() || checkDiagonal()) isWin = true;
+
+    return isWin;
+  }
+
+  function checkTieCondition(winCondition, numberOfPlacement) {
+    return !winCondition && numberOfPlacement === board.getMaxPlacement() ? true : false;
+  }
+
+  function playGame(inputRow, inputCol) {
+    numberOfPlacement++;
+    board.placeSymbol(activePlayer.symbol, inputRow, inputCol);
+
+    if (checkWinCondition()) {
+      // Check win condition
       board.printBoard();
-      currentPlayer.giveScore();
-      console.log(`${currentPlayer.name} has won!`);
-      console.log(`${currentPlayer.name}'s total score is: ${currentPlayer.getScore()}`);
+      activePlayer.giveScore();
+      console.log(`${activePlayer.name} has won!`);
+      console.log(`${activePlayer.name}'s score is: ${activePlayer.getScore()}`);
+    } else if (checkTieCondition()) {
+      // Check tie condition
+      console.log("It's a tie");
     } else {
       switchPlayerTurn();
       printRoundMessage();
@@ -184,7 +197,33 @@ function GameController(playerOneName, playerTwoName) {
 
   printRoundMessage();
 
-  return { getCurrentPlayer, playOneRound, playMatch };
+  return { getCurrentPlayer, playGame, resetGame };
 }
 
 const game = GameController("Minh", "BOT");
+
+// TEST1: Minh win by row.
+// game.playGame(0, 0);
+// game.playGame(1, 0);
+// game.playGame(0, 1);
+// game.playGame(1, 1);
+// game.playGame(0, 2);
+
+// TEST2: A tie game.
+game.playGame(0, 0);
+game.playGame(0, 1);
+game.playGame(0, 2);
+game.playGame(1, 1);
+game.playGame(1, 0);
+game.playGame(1, 2);
+game.playGame(2, 1);
+game.playGame(2, 0);
+game.playGame(2, 2);
+
+// const de = [
+//   ["X", "X", "X"],
+//   ["X", " ", "X"],
+//   ["X", "X", "X"],
+// ];
+
+// checkTieCondition(de);
