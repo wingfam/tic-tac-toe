@@ -73,9 +73,9 @@ const GameBoard = (function () {
     console.log(boardWithCellValues);
   };
 
-  const placeSymbol = (playerSymbol, row, column) => {
+  const placeSymbol = (activePlayerName, playerSymbol, row, column) => {
     board[row][column].addSymbol(playerSymbol);
-    console.log(`Player ${activePlayer.name}'s symbol has been placed`);
+    console.log(`Player ${activePlayerName}'s symbol has been placed`);
   };
 
   function clearBoard() {
@@ -125,7 +125,7 @@ function GameController(playerOneName, playerTwoName) {
     printRoundMessage();
   };
 
-  function checkWinCondition(playerSymbol, board) {
+  const checkWinCondition = (playerSymbol, board) => {
     let isWin = false;
     const totalCol = board.getColumn();
     const boardWithValues = board.getBoardWithValues();
@@ -175,15 +175,15 @@ function GameController(playerOneName, playerTwoName) {
     if (checkRow() || checkColumn() || checkDiagonal()) isWin = true;
 
     return isWin;
-  }
+  };
 
-  function checkTieCondition(winCondition, numberOfPlacement) {
+  const checkTieCondition = (winCondition, numberOfPlacement) => {
     return !winCondition && numberOfPlacement === board.getMaxPlacement() ? true : false;
-  }
+  };
 
-  function playGame(inputRow, inputCol) {
+  const playGame = (inputRow, inputCol) => {
     numberOfPlacement++;
-    board.placeSymbol(activePlayer.symbol, inputRow, inputCol);
+    board.placeSymbol(activePlayer.name, activePlayer.symbol, inputRow, inputCol);
 
     if (checkWinCondition()) {
       // Check win condition
@@ -198,7 +198,7 @@ function GameController(playerOneName, playerTwoName) {
       switchPlayerTurn();
       printRoundMessage();
     }
-  }
+  };
 
   printRoundMessage();
 
