@@ -13,11 +13,12 @@ TODO:
 7. [X] Implement a win condition and give one score to winner. 
 8. [X] Give board a blank slate after declare a winner of that round.
 9. [X] Implement a tie condition.
-10. [] Draw a grid, and center it on the browser screen.
-11. [] Add event listener to each cell on click.
-12. [] Add labels for player1 and player2 for their name.
-13. [] Add some basic stylized element: font-family, font-size, color,...
-14. [] Use javascript to display focus when switch between player turn like: color on focus,...
+10. [X] Draw a grid, and center it on the browser screen.
+11. [X] Add event listener to each cell on click.
+12. [X] Add labels for player1 and player2 for their name.
+13. [X] Add some basic stylized element: font-family, font-size, color,...
+14. [X] Use javascript to display change label when switch between player turn like: color on focus,...
+15. [] When a symbol is placed, draw it onto the board.
 */
 
 function Cell() {
@@ -86,6 +87,18 @@ const GameBoard = (function () {
     });
   }
 
+  function addEventToGridItems() {
+    const gridItems = document.getElementsByClassName("grid-item");
+    for (let item of gridItems) {
+      item.addEventListener("click", function (e) {
+        console.log(this.className);
+        console.log(e.currentTarget === this);
+      });
+    }
+  }
+
+  addEventToGridItems();
+
   return {
     getColumn,
     getBoard,
@@ -101,17 +114,28 @@ function GameController(playerOneName, playerTwoName) {
   const board = GameBoard;
   const player1 = createPlayer(playerOneName, "X");
   const player2 = createPlayer(playerTwoName, "O");
+  const playerOneLabel = document.getElementById("player1");
+  const playerTwoLabel = document.getElementById("player2");
 
   let numberOfPlacement = 0;
   let activePlayer = player1;
+  playerOneLabel.style.color = "#ff0000"
 
   const getCurrentPlayer = () => activePlayer;
 
+  const changePlayerNameStyle = (activePlayer, inactivePlayer) => {
+    inactivePlayer.style.color = "#000000";
+    activePlayer.style.color = "#ff0000";
+  }
+
   const switchPlayerTurn = () => {
-    activePlayer.name === player1.name
-      ? (activePlayer = player2)
-      : (activePlayer = player1);
-    return activePlayer;
+    if (activePlayer.name === player1.name) {
+      activePlayer = player2;
+      changePlayerNameStyle(playerTwoLabel, playerOneLabel);
+    } else {
+      activePlayer = player1;
+      changePlayerNameStyle(playerOneLabel, playerTwoLabel);
+    }
   };
 
   const printRoundMessage = () => {
@@ -136,7 +160,7 @@ function GameController(playerOneName, playerTwoName) {
     function checkRow() {
       for (let row of boardWithValues) {
         if (row.every(compareSymbol)) return true;
-        else return false;
+        // else return false;
       }
     }
 
@@ -148,7 +172,7 @@ function GameController(playerOneName, playerTwoName) {
         });
 
         if (col.every(compareSymbol)) return true;
-        else return false;
+        // else return false;
       }
     }
 
@@ -169,7 +193,7 @@ function GameController(playerOneName, playerTwoName) {
         })
         .every(compareSymbol);
 
-      isLinearTrue || isReverseTrue ? true : false;
+      if (isLinearTrue || isReverseTrue) return true;
     }
 
     if (checkRow() || checkColumn() || checkDiagonal()) isWin = true;
@@ -177,26 +201,25 @@ function GameController(playerOneName, playerTwoName) {
     return isWin;
   };
 
-  const checkTieCondition = (winCondition, numberOfPlacement) => {
-    return !winCondition && numberOfPlacement === board.getMaxPlacement() ? true : false;
-  };
-
   const playGame = (inputRow, inputCol) => {
     numberOfPlacement++;
     board.placeSymbol(activePlayer.name, activePlayer.symbol, inputRow, inputCol);
+    let winCondition = checkWinCondition(activePlayer.symbol, board);
 
-    if (checkWinCondition()) {
-      // Check win condition
+    // Check win condition
+    if (winCondition) {
       board.printBoard();
       activePlayer.giveScore();
       console.log(`${activePlayer.name} has won!`);
       console.log(`${activePlayer.name}'s score is: ${activePlayer.getScore()}`);
-    } else if (checkTieCondition()) {
-      // Check tie condition
-      console.log("It's a tie");
     } else {
       switchPlayerTurn();
       printRoundMessage();
+    }
+
+    // Check tie condition
+    if (numberOfPlacement >= board.getMaxPlacement()) {
+      console.log("It's a tie");
     }
   };
 
@@ -208,22 +231,38 @@ function GameController(playerOneName, playerTwoName) {
 const game = GameController("Minh", "BOT");
 
 // TEST1: Minh win by row.
-// game.playGame(0, 0);
 // game.playGame(1, 0);
+// game.playGame(0, 0);
+// game.playGame(1, 1);
+// game.playGame(0, 1);
+// game.playGame(1, 2);
+
+// TEST2: BOT win by column
+// game.playGame(0, 0);
+// game.playGame(0, 1);
+// game.playGame(0, 2);
+// game.playGame(1, 1);
+// game.playGame(1, 0);
+// game.playGame(2, 1);
+
+// TEST3: Minh win by diagonal
+// game.playGame(0, 0);
 // game.playGame(0, 1);
 // game.playGame(1, 1);
-// game.playGame(0, 2);
+// game.playGame(1, 2);
+// game.playGame(2, 2);
+// game.playGame(2, 1);
 
-// TEST2: A tie game.
-game.playGame(0, 0);
-game.playGame(0, 1);
-game.playGame(0, 2);
-game.playGame(1, 1);
-game.playGame(1, 0);
-game.playGame(1, 2);
-game.playGame(2, 1);
-game.playGame(2, 0);
-game.playGame(2, 2);
+// TEST4: A tie game.
+// game.playGame(0, 0);
+// game.playGame(0, 1);
+// game.playGame(0, 2);
+// game.playGame(1, 1);
+// game.playGame(1, 0);
+// game.playGame(1, 2);
+// game.playGame(2, 1);
+// game.playGame(2, 0);
+// game.playGame(2, 2);
 
 // const de = [
 //   ["X", "X", "X"],
