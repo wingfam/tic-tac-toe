@@ -13,6 +13,11 @@ TODO:
 7. [X] Implement a win condition and give one score to winner. 
 8. [X] Give board a blank slate after declare a winner of that round.
 9. [X] Implement a tie condition.
+10. [] Draw a grid, and center it on the browser screen.
+11. [] Add event listener to each cell on click.
+12. [] Add labels for player1 and player2 for their name.
+13. [] Add some basic stylized element: font-family, font-size, color,...
+14. [] Use javascript to display focus when switch between player turn like: color on focus,...
 */
 
 function Cell() {
