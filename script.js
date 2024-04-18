@@ -18,7 +18,9 @@ TODO:
 12. [X] Add labels for player1 and player2 for their name.
 13. [X] Add some basic stylized element: font-family, font-size, color,...
 14. [X] Use javascript to display change label when switch between player turn like: color on focus,...
-15. [] When a symbol is placed, draw it onto the board.
+15. [X] When a symbol is placed, draw it onto the board.
+16. [X] Display alert when win or tie condition is met. Then force reset game.
+17. [X] Create a reset button to reset the round and clear the board.
 */
 
 function Cell() {
@@ -97,32 +99,73 @@ const GameBoard = (function () {
   };
 })();
 
+const DisplayController = (function () {
+  const playerOneLabel = document.querySelector("#player1");
+  const playerTwoLabel = document.querySelector("#player2");
+  const playerTurnLegend = document.querySelector("legend");
+
+  playerOneLabel.style.color = "#ff0000";
+
+  const insertPlayerSymbol = (tdTag, playerSymbol) => {
+    tdTag.textContent = playerSymbol;
+  };
+
+  const changePlayerNameStyle = (activePlayer) => {
+    changePlayerTurnText(activePlayer);
+    if (activePlayer.name === playerTwoLabel.textContent) {
+      playerOneLabel.style.color = "#000000";
+      playerTwoLabel.style.color = "#ff0000";
+    } else if (activePlayer.name === playerOneLabel.textContent) {
+      playerTwoLabel.style.color = "#000000";
+      playerOneLabel.style.color = "#ff0000";
+    }
+  };
+
+  const changePlayerTurnText = (activePlayer) => {
+    const regex = /[^\s]+/; // Match any character until the first white space.
+    playerTurnLegend.textContent = playerTurnLegend.textContent.replace(
+      regex,
+      activePlayer.name
+    );
+  };
+
+  const redrawBoard = () => {
+    const tdTags = document.querySelectorAll("td");
+    tdTags.forEach((tag) => {
+      tag.textContent = "";
+    });
+  };
+
+  const alertEndGame = (isWin, isTie, isReset) => {
+    if (isWin) alert("The player has won");
+    if (isTie) alert("The game is tie");
+    if (isReset) alert("The game has been reset");
+  };
+
+  return { insertPlayerSymbol, changePlayerNameStyle, redrawBoard, alertEndGame };
+})();
+
 function GameController(playerOneName, playerTwoName) {
   const board = GameBoard;
+  const displayController = DisplayController;
   const player1 = createPlayer(playerOneName, "X");
   const player2 = createPlayer(playerTwoName, "O");
-  const playerOneLabel = document.getElementById("player1");
-  const playerTwoLabel = document.getElementById("player2");
 
   let numberOfPlacement = 0;
   let activePlayer = player1;
-  playerOneLabel.style.color = "#ff0000";
 
   const getCurrentPlayer = () => activePlayer;
 
-  const changePlayerNameStyle = (activePlayer, inactivePlayer) => {
-    inactivePlayer.style.color = "#000000";
-    activePlayer.style.color = "#ff0000";
+  const switchPlayerTurn = () => {
+    activePlayer.name === player1.name
+      ? (activePlayer = player2)
+      : (activePlayer = player1);
+    displayController.changePlayerNameStyle(activePlayer);
   };
 
-  const switchPlayerTurn = () => {
-    if (activePlayer.name === player1.name) {
-      activePlayer = player2;
-      changePlayerNameStyle(playerTwoLabel, playerOneLabel);
-    } else {
-      activePlayer = player1;
-      changePlayerNameStyle(playerOneLabel, playerTwoLabel);
-    }
+  const resetPlayerTurn = () => {
+    activePlayer = player1;
+    displayController.changePlayerNameStyle(activePlayer);
   };
 
   const printRoundMessage = () => {
@@ -131,8 +174,10 @@ function GameController(playerOneName, playerTwoName) {
   };
 
   const resetGame = () => {
-    console.log("A new round has started.");
+    resetPlayerTurn();
     board.clearBoard();
+    displayController.redrawBoard();
+    displayController.alertEndGame(false, false, true);
     printRoundMessage();
   };
 
@@ -197,8 +242,8 @@ function GameController(playerOneName, playerTwoName) {
     if (winCondition) {
       board.printBoard();
       activePlayer.giveScore();
-      console.log(`${activePlayer.name} has won!`);
-      console.log(`${activePlayer.name}'s score is: ${activePlayer.getScore()}`);
+      displayController.alertEndGame(true, false, false);
+      displayController.redrawBoard();
     } else {
       switchPlayerTurn();
       printRoundMessage();
@@ -206,7 +251,9 @@ function GameController(playerOneName, playerTwoName) {
 
     // Check tie condition
     if (numberOfPlacement >= board.getMaxPlacement()) {
-      console.log("It's a tie");
+      resetGame();
+      displayController.alertEndGame(false, true, false);
+      displayController.redrawBoard();
     }
   };
 
@@ -214,49 +261,24 @@ function GameController(playerOneName, playerTwoName) {
     const cells = document.querySelectorAll("td");
     cells.forEach((cell) => {
       cell.addEventListener("click", function () {
+        displayController.insertPlayerSymbol(cell, activePlayer.symbol);
         playGame(cell.closest("tr").rowIndex, cell.cellIndex);
       });
     });
   }
 
+  function resetButtonEventHandler() {
+    const resetButton = document.querySelector("#reset-button");
+    resetButton.addEventListener("click", function () {
+      resetGame();
+    });
+  }
+
   addEventToGridItems();
+  resetButtonEventHandler();
   printRoundMessage();
 
-  return { getCurrentPlayer, playGame, resetGame };
+  return { getCurrentPlayer, playGame, resetGame, resetButtonEventHandler };
 }
 
 const game = GameController("Minh", "BOT");
-
-// TEST1: Minh win by row.
-// game.playGame(1, 0);
-// game.playGame(0, 0);
-// game.playGame(1, 1);
-// game.playGame(0, 1);
-// game.playGame(1, 2);
-
-// TEST2: BOT win by column
-// game.playGame(0, 0);
-// game.playGame(0, 1);
-// game.playGame(0, 2);
-// game.playGame(1, 1);
-// game.playGame(1, 0);
-// game.playGame(2, 1);
-
-// TEST3: Minh win by diagonal
-// game.playGame(0, 0);
-// game.playGame(0, 1);
-// game.playGame(1, 1);
-// game.playGame(1, 2);
-// game.playGame(2, 2);
-// game.playGame(2, 1);
-
-// TEST4: A tie game.
-// game.playGame(0, 0);
-// game.playGame(0, 1);
-// game.playGame(0, 2);
-// game.playGame(1, 1);
-// game.playGame(1, 0);
-// game.playGame(1, 2);
-// game.playGame(2, 1);
-// game.playGame(2, 0);
-// game.playGame(2, 2);
