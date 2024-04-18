@@ -74,9 +74,8 @@ const GameBoard = (function () {
     console.log(boardWithCellValues);
   };
 
-  const placeSymbol = (activePlayerName, playerSymbol, row, column) => {
+  const placeSymbol = (playerSymbol, row, column) => {
     board[row][column].addSymbol(playerSymbol);
-    console.log(`Player ${activePlayerName}'s symbol has been placed`);
   };
 
   function clearBoard() {
@@ -86,18 +85,6 @@ const GameBoard = (function () {
       });
     });
   }
-
-  function addEventToGridItems() {
-    const gridItems = document.getElementsByClassName("grid-item");
-    for (let item of gridItems) {
-      item.addEventListener("click", function (e) {
-        console.log(this.className);
-        console.log(e.currentTarget === this);
-      });
-    }
-  }
-
-  addEventToGridItems();
 
   return {
     getColumn,
@@ -119,14 +106,14 @@ function GameController(playerOneName, playerTwoName) {
 
   let numberOfPlacement = 0;
   let activePlayer = player1;
-  playerOneLabel.style.color = "#ff0000"
+  playerOneLabel.style.color = "#ff0000";
 
   const getCurrentPlayer = () => activePlayer;
 
   const changePlayerNameStyle = (activePlayer, inactivePlayer) => {
     inactivePlayer.style.color = "#000000";
     activePlayer.style.color = "#ff0000";
-  }
+  };
 
   const switchPlayerTurn = () => {
     if (activePlayer.name === player1.name) {
@@ -203,7 +190,7 @@ function GameController(playerOneName, playerTwoName) {
 
   const playGame = (inputRow, inputCol) => {
     numberOfPlacement++;
-    board.placeSymbol(activePlayer.name, activePlayer.symbol, inputRow, inputCol);
+    board.placeSymbol(activePlayer.symbol, inputRow, inputCol);
     let winCondition = checkWinCondition(activePlayer.symbol, board);
 
     // Check win condition
@@ -223,6 +210,16 @@ function GameController(playerOneName, playerTwoName) {
     }
   };
 
+  function addEventToGridItems() {
+    const cells = document.querySelectorAll("td");
+    cells.forEach((cell) => {
+      cell.addEventListener("click", function () {
+        playGame(cell.closest("tr").rowIndex, cell.cellIndex);
+      });
+    });
+  }
+
+  addEventToGridItems();
   printRoundMessage();
 
   return { getCurrentPlayer, playGame, resetGame };
@@ -263,11 +260,3 @@ const game = GameController("Minh", "BOT");
 // game.playGame(2, 1);
 // game.playGame(2, 0);
 // game.playGame(2, 2);
-
-// const de = [
-//   ["X", "X", "X"],
-//   ["X", " ", "X"],
-//   ["X", "X", "X"],
-// ];
-
-// checkTieCondition(de);
