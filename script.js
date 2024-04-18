@@ -1,28 +1,3 @@
-/* 
-TODO:
-1. [X] Create an object to store player information like: name, symbol, total score.
-2. [X] Create a function allow player to place their symbol on the board. Input are:
-   player name, selected row and colum.
-3. [X] Create a function print aout the gameboard with recent change (like when player
-   just place one of their symbol).
-4. [X] Create a function that switch player's turn.
-5. [X] Create a factory function to keep track of each cell on the gameboard (which cell
-   has symbol of which player on and which cell hasn't).
-6. [X] Create a GameController factory function that responsible for controlling the 
-   flow and state of the game's turn.
-7. [X] Implement a win condition and give one score to winner. 
-8. [X] Give board a blank slate after declare a winner of that round.
-9. [X] Implement a tie condition.
-10. [X] Draw a grid, and center it on the browser screen.
-11. [X] Add event listener to each cell on click.
-12. [X] Add labels for player1 and player2 for their name.
-13. [X] Add some basic stylized element: font-family, font-size, color,...
-14. [X] Use javascript to display change label when switch between player turn like: color on focus,...
-15. [X] When a symbol is placed, draw it onto the board.
-16. [X] Display alert when win or tie condition is met. Then force reset game.
-17. [X] Create a reset button to reset the round and clear the board.
-*/
-
 function Cell() {
   let value = " ";
 
