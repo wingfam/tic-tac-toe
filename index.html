@@ -10,7 +10,10 @@
     </head>
     <body>
         <main>
-            <label id="player1">Player</label>
+            <div>
+                <label for="first-player-name" id="first-player-name-label">First Player</label>
+                <input id="first-player-name" type="text" />
+            </div>
             <fieldset>
                 <legend>Player turn</legend>
                 <table>
@@ -35,9 +38,13 @@
                         <td></td>
                     </tr>
                 </table>
-                <button id="reset-button">Reset</button>
+                <button type="button" id="reset-button">Reset</button>
+                <button type="button" id="start-button">Start</button>
             </fieldset>
-            <label id="player2">BOT</label>
+            <div>
+                <label for="second-player-name" id="second-player-name-label">Second Player</label>
+                <input id="second-player-name" type="text" />
+            </div>
         </main>
         <script src="script.js" async defer></script>
     </body>

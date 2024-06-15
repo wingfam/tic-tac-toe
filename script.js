@@ -1,9 +1,8 @@
 /*  
 TODO:
-- Add a check that keeps players from playing in spots that are already taken
-Try to get value at the cell that the player is trying to place their symbol.
-If it already had a value do nothing, else place current player's symbol.
-- Add a tie condition
+Clean up the interface to allow players to put in their names, include a button 
+to start/restart the game and add a display element that shows the results upon 
+game end!
 */
 
 function Player(name, symbol) {
@@ -24,6 +23,7 @@ function Cell() {
 
   return { addSymbol, getValue };
 }
+
 
 const GameBoard = (function () {
   let board = [];
@@ -81,6 +81,7 @@ const GameBoard = (function () {
   };
 })();
 
+
 const DisplayController = (function () {
   const playerTurnLegend = document.querySelector("legend");
 
@@ -109,16 +110,21 @@ const DisplayController = (function () {
   return { insertPlayerSymbol, changePlayerTurnText, redrawBoard };
 })();
 
-function GameController(playerOneName, playerTwoName) {
+
+function GameController() {
   const board = GameBoard;
   const displayController = DisplayController;
-  const player1 = Player(playerOneName, "X");
-  const player2 = Player(playerTwoName, "O");
+  const selectPlayer1 = document.querySelector("#first-player-name");
+  const selectPlayer2 = document.querySelector("#second-player-name");
+  const firstPlayerLabel = document.querySelector("#first-player-name-label");
+  const secondPlayerLabel = document.querySelector("#second-player-name-label");
+  const startBtn = document.querySelector("#start-button");
+  const resetBtn = document.querySelector("#reset-button");
 
-  let numberOfPlacement = 0;
-  let activePlayer = player1;
-
-  const getCurrentPlayer = () => activePlayer;
+  let numberOfPlacement = null;
+  let activePlayer = null;
+  let player1 = null;
+  let player2 = null;
 
   const switchPlayerTurn = () => {
     activePlayer.name === player1.name
@@ -127,13 +133,29 @@ function GameController(playerOneName, playerTwoName) {
     displayController.changePlayerTurnText(activePlayer);
   };
 
-  const resetPlayerTurn = () => {
-    activePlayer = player1;
-    displayController.changePlayerTurnText(activePlayer);
-  };
+  function startGame() {
+    if (selectPlayer1.value != "" && selectPlayer2.value != "") {
+      player1 = Player(selectPlayer1.value, "X");
+      player2 = Player(selectPlayer2.value, "O");
+
+      numberOfPlacement = 0;
+      activePlayer = player1;
+
+      displayController.changePlayerTurnText(activePlayer);
+
+      startBtn.style.display = "none";
+      resetBtn.style.display = "block";
+      selectPlayer1.style.display = "none";
+      selectPlayer2.style.display = "none";
+      firstPlayerLabel.style.display = "none";
+      secondPlayerLabel.style.display = "none";
+    } else {
+      alert("Please make sure that both player's name was entered!");
+    }
+  }
 
   const resetGame = () => {
-    resetPlayerTurn();
+    switchPlayerTurn();
     board.clearBoard();
     displayController.redrawBoard();
   };
@@ -188,22 +210,6 @@ function GameController(playerOneName, playerTwoName) {
     };
   };
 
-  function addPlayGameEventToCells() {
-    const cells = document.querySelectorAll("td");
-    cells.forEach((cell) => {
-      cell.addEventListener("click", function () {
-        playGame(cell.closest("tr").rowIndex, cell.cellIndex);
-      });
-    });
-  }
-
-  function resetButtonEventHandler() {
-    const resetButton = document.querySelector("#reset-button");
-    resetButton.addEventListener("click", function () {
-      resetGame();
-    });
-  }
-
   const playGame = (row, col) => {
     const isSymbolPlaced = board.placeSymbol(activePlayer.symbol, row, col);
     if (isSymbolPlaced) {
@@ -224,16 +230,31 @@ function GameController(playerOneName, playerTwoName) {
 
     // Check tie condition
     if (numberOfPlacement >= board.getMaxPlacement()) {
-      alert("The game is tie. The game will reset");
       resetGame();
       numberOfPlacement = 0;
+      alert("The game is tie. The game will reset");
     }
   };
 
-  addPlayGameEventToCells();
-  resetButtonEventHandler();
+  (function addPlayGameEventToCells() {
+    const cells = document.querySelectorAll("td");
+    cells.forEach((cell) => {
+      cell.addEventListener("click", function () {
+        playGame(cell.closest("tr").rowIndex, cell.cellIndex);
+      });
+    });
+  })();
 
-  return { getCurrentPlayer, playGame, resetGame, resetButtonEventHandler };
+  (function resetButtonEventHandler() {
+    const resetBtn = document.querySelector("#reset-button");
+    resetBtn.addEventListener("click", function () {
+      resetGame();
+    });
+  })();
+
+  startBtn.addEventListener("click", startGame);
+
+  return { playGame, resetGame };
 }
 
-const game = GameController("Player", "BOT");
+GameController();
