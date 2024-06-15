@@ -1,3 +1,11 @@
+/*  
+TODO:
+- Add a check that keeps players from playing in spots that are already taken
+Try to get value at the cell that the player is trying to place their symbol.
+If it already had a value do nothing, else place current player's symbol.
+- Add a tie condition
+*/ 
+
 function Cell() {
   let value = " ";
 
@@ -16,6 +24,31 @@ function createPlayer(name, symbol) {
   const giveScore = () => score++;
   return { name, symbol, getScore, giveScore };
 }
+
+const DisplayController = (function () {
+  const playerTurnLegend = document.querySelector("legend");
+
+  const insertPlayerSymbol = (tdTag, playerSymbol) => {
+    tdTag.textContent = playerSymbol;
+  };
+
+  const changePlayerTurnText = (activePlayer) => {
+    const regex = /[^\s]+/; // Match any character until the first white space.
+    playerTurnLegend.textContent = playerTurnLegend.textContent.replace(
+      regex,
+      activePlayer.name
+    );
+  };
+
+  const redrawBoard = () => {
+    const tdTags = document.querySelectorAll("td");
+    tdTags.forEach((tag) => {
+      tag.textContent = "";
+    });
+  };
+
+  return { insertPlayerSymbol, changePlayerTurnText, redrawBoard };
+})();
 
 const GameBoard = (function () {
   const rows = 3;
@@ -46,11 +79,6 @@ const GameBoard = (function () {
     );
   };
 
-  const printBoard = () => {
-    const boardWithCellValues = getBoardWithValues();
-    console.log(boardWithCellValues);
-  };
-
   const placeSymbol = (playerSymbol, row, column) => {
     board[row][column].addSymbol(playerSymbol);
   };
@@ -67,57 +95,10 @@ const GameBoard = (function () {
     getColumn,
     getBoard,
     placeSymbol,
-    printBoard,
     getBoardWithValues,
     clearBoard,
     getMaxPlacement,
   };
-})();
-
-const DisplayController = (function () {
-  const playerOneLabel = document.querySelector("#player1");
-  const playerTwoLabel = document.querySelector("#player2");
-  const playerTurnLegend = document.querySelector("legend");
-
-  playerOneLabel.style.color = "#ff0000";
-
-  const insertPlayerSymbol = (tdTag, playerSymbol) => {
-    tdTag.textContent = playerSymbol;
-  };
-
-  const changePlayerNameStyle = (activePlayer) => {
-    changePlayerTurnText(activePlayer);
-    if (activePlayer.name === playerTwoLabel.textContent) {
-      playerOneLabel.style.color = "#000000";
-      playerTwoLabel.style.color = "#ff0000";
-    } else if (activePlayer.name === playerOneLabel.textContent) {
-      playerTwoLabel.style.color = "#000000";
-      playerOneLabel.style.color = "#ff0000";
-    }
-  };
-
-  const changePlayerTurnText = (activePlayer) => {
-    const regex = /[^\s]+/; // Match any character until the first white space.
-    playerTurnLegend.textContent = playerTurnLegend.textContent.replace(
-      regex,
-      activePlayer.name
-    );
-  };
-
-  const redrawBoard = () => {
-    const tdTags = document.querySelectorAll("td");
-    tdTags.forEach((tag) => {
-      tag.textContent = "";
-    });
-  };
-
-  const alertEndGame = (isWin, isTie, isReset) => {
-    if (isWin) alert("The player has won");
-    if (isTie) alert("The game is tie");
-    if (isReset) alert("The game has been reset");
-  };
-
-  return { insertPlayerSymbol, changePlayerNameStyle, redrawBoard, alertEndGame };
 })();
 
 function GameController(playerOneName, playerTwoName) {
@@ -135,25 +116,18 @@ function GameController(playerOneName, playerTwoName) {
     activePlayer.name === player1.name
       ? (activePlayer = player2)
       : (activePlayer = player1);
-    displayController.changePlayerNameStyle(activePlayer);
+    displayController.changePlayerTurnText(activePlayer);
   };
 
   const resetPlayerTurn = () => {
     activePlayer = player1;
-    displayController.changePlayerNameStyle(activePlayer);
-  };
-
-  const printRoundMessage = () => {
-    console.log(`It's ${activePlayer.name}'s turn`);
-    board.printBoard();
+    displayController.changePlayerTurnText(activePlayer);
   };
 
   const resetGame = () => {
     resetPlayerTurn();
     board.clearBoard();
     displayController.redrawBoard();
-    displayController.alertEndGame(false, false, true);
-    printRoundMessage();
   };
 
   const checkWinCondition = (playerSymbol, board) => {
@@ -188,7 +162,7 @@ function GameController(playerOneName, playerTwoName) {
       // Diagonal from top left to bottom right
       const isLinearTrue = boardWithValues
         .map(function (cell, index) {
-          return cell[index]; // index increase for each subsequence loop
+          return cell[index];
         })
         .every(compareSymbol);
 
@@ -215,21 +189,19 @@ function GameController(playerOneName, playerTwoName) {
 
     // Check win condition
     if (winCondition) {
-      board.printBoard();
+      board.clearBoard();
       activePlayer.giveScore();
-      displayController.alertEndGame(true, false, false);
       displayController.redrawBoard();
+      alert(activePlayer.name + " has won the match");
     } else {
       switchPlayerTurn();
-      printRoundMessage();
     }
 
     // Check tie condition
-    if (numberOfPlacement >= board.getMaxPlacement()) {
-      resetGame();
-      displayController.alertEndGame(false, true, false);
-      displayController.redrawBoard();
-    }
+    // if (numberOfPlacement >= board.getMaxPlacement()) {
+    //   resetGame();
+    //   displayController.redrawBoard();
+    // }
   };
 
   function addEventToGridItems() {
@@ -251,9 +223,8 @@ function GameController(playerOneName, playerTwoName) {
 
   addEventToGridItems();
   resetButtonEventHandler();
-  printRoundMessage();
 
   return { getCurrentPlayer, playGame, resetGame, resetButtonEventHandler };
 }
 
-const game = GameController("Minh", "BOT");
+const game = GameController("Player", "BOT");
