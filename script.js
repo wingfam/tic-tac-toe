@@ -1,10 +1,3 @@
-/*  
-TODO:
-Clean up the interface to allow players to put in their names, include a button 
-to start/restart the game and add a display element that shows the results upon 
-game end!
-*/
-
 function Player(name, symbol) {
   let score = 0;
   const getScore = () => score;
