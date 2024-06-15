@@ -1,8 +1,3 @@
-/* http://meyerweb.com/eric/tools/css/reset/ 
-   v2.0 | 20110126
-   License: none (public domain)
-*/
-
 html,
 body,
 div,
@@ -192,11 +187,34 @@ td {
 	font-size: 10vh;
 }
 
-#reset-button {
+#reset-button, #start-button {
 	width: 100%;
 	height: 80px;
 	margin-top: 30px;
 	font-size: 50px;
 	text-align: center;
 	vertical-align: middle;
+}
+
+#reset-button {
+	display: none;
+}
+
+main div:nth-child(1), main div:nth-child(3) {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#first-player-name, #second-player-name {
+	margin-top: 10px;
+	height: 50px;
+	width: 250px;
+	font-size: 30px;
+}
+
+#first-player-name-label, #second-player-name-label {
+	font-weight: 700;
+	font-size: 20px;
 }

@@ -1,31 +1,32 @@
-function Cell() {
-  let value = " ";
-
-  function addSymbol(playerSymbol) {
-    value = value.replace(value, playerSymbol);
-  }
-
-  const getValue = () => value;
-
-  return { addSymbol, getValue };
-}
-
-function createPlayer(name, symbol) {
+function Player(name, symbol) {
   let score = 0;
   const getScore = () => score;
   const giveScore = () => score++;
   return { name, symbol, getScore, giveScore };
 }
 
+function Cell() {
+  let value = "";
+
+  const getValue = () => value;
+
+  function addSymbol(playerSymbol) {
+    value = value.replace(value, playerSymbol);
+  }
+
+  return { addSymbol, getValue };
+}
+
+
 const GameBoard = (function () {
+  let board = [];
   const rows = 3;
   const columns = 3;
   const maximumPlacement = rows * columns;
-  let board = [];
 
+  const getBoard = () => board;
   const getColumn = () => columns;
   const getMaxPlacement = () => maximumPlacement;
-  const getBoard = () => board;
 
   for (let i = 0; i < rows; i++) {
     // For each row, asign an empty array
@@ -46,19 +47,19 @@ const GameBoard = (function () {
     );
   };
 
-  const printBoard = () => {
-    const boardWithCellValues = getBoardWithValues();
-    console.log(boardWithCellValues);
-  };
-
-  const placeSymbol = (playerSymbol, row, column) => {
-    board[row][column].addSymbol(playerSymbol);
+  const placeSymbol = (activePlayerSymbol, row, column) => {
+    const boardWithValues = getBoardWithValues();
+    if (!boardWithValues[row][column]) {
+      board[row][column].addSymbol(activePlayerSymbol);
+      return true;
+    }
+    return false;
   };
 
   function clearBoard() {
     board.forEach((row) => {
       row.forEach((cell) => {
-        cell.addSymbol(" ");
+        cell.addSymbol("");
       });
     });
   }
@@ -67,33 +68,21 @@ const GameBoard = (function () {
     getColumn,
     getBoard,
     placeSymbol,
-    printBoard,
     getBoardWithValues,
     clearBoard,
-    getMaxPlacement,
+    getMaxPlacement
   };
 })();
 
+
 const DisplayController = (function () {
-  const playerOneLabel = document.querySelector("#player1");
-  const playerTwoLabel = document.querySelector("#player2");
   const playerTurnLegend = document.querySelector("legend");
 
-  playerOneLabel.style.color = "#ff0000";
-
-  const insertPlayerSymbol = (tdTag, playerSymbol) => {
-    tdTag.textContent = playerSymbol;
-  };
-
-  const changePlayerNameStyle = (activePlayer) => {
-    changePlayerTurnText(activePlayer);
-    if (activePlayer.name === playerTwoLabel.textContent) {
-      playerOneLabel.style.color = "#000000";
-      playerTwoLabel.style.color = "#ff0000";
-    } else if (activePlayer.name === playerOneLabel.textContent) {
-      playerTwoLabel.style.color = "#000000";
-      playerOneLabel.style.color = "#ff0000";
-    }
+  const insertPlayerSymbol = (row, col, playerSymbol) => {
+    const selectedCell = document.querySelector(
+      "tr:nth-child(" + row + ") > td:nth-child(" + col + ")"
+    );
+    selectedCell.textContent = playerSymbol;
   };
 
   const changePlayerTurnText = (activePlayer) => {
@@ -111,63 +100,69 @@ const DisplayController = (function () {
     });
   };
 
-  const alertEndGame = (isWin, isTie, isReset) => {
-    if (isWin) alert("The player has won");
-    if (isTie) alert("The game is tie");
-    if (isReset) alert("The game has been reset");
-  };
-
-  return { insertPlayerSymbol, changePlayerNameStyle, redrawBoard, alertEndGame };
+  return { insertPlayerSymbol, changePlayerTurnText, redrawBoard };
 })();
 
-function GameController(playerOneName, playerTwoName) {
+
+function GameController() {
   const board = GameBoard;
   const displayController = DisplayController;
-  const player1 = createPlayer(playerOneName, "X");
-  const player2 = createPlayer(playerTwoName, "O");
+  const selectPlayer1 = document.querySelector("#first-player-name");
+  const selectPlayer2 = document.querySelector("#second-player-name");
+  const firstPlayerLabel = document.querySelector("#first-player-name-label");
+  const secondPlayerLabel = document.querySelector("#second-player-name-label");
+  const startBtn = document.querySelector("#start-button");
+  const resetBtn = document.querySelector("#reset-button");
 
-  let numberOfPlacement = 0;
-  let activePlayer = player1;
-
-  const getCurrentPlayer = () => activePlayer;
+  let numberOfPlacement = null;
+  let activePlayer = null;
+  let player1 = null;
+  let player2 = null;
 
   const switchPlayerTurn = () => {
     activePlayer.name === player1.name
       ? (activePlayer = player2)
       : (activePlayer = player1);
-    displayController.changePlayerNameStyle(activePlayer);
+    displayController.changePlayerTurnText(activePlayer);
   };
 
-  const resetPlayerTurn = () => {
-    activePlayer = player1;
-    displayController.changePlayerNameStyle(activePlayer);
-  };
+  function startGame() {
+    if (selectPlayer1.value != "" && selectPlayer2.value != "") {
+      player1 = Player(selectPlayer1.value, "X");
+      player2 = Player(selectPlayer2.value, "O");
 
-  const printRoundMessage = () => {
-    console.log(`It's ${activePlayer.name}'s turn`);
-    board.printBoard();
-  };
+      numberOfPlacement = 0;
+      activePlayer = player1;
+
+      displayController.changePlayerTurnText(activePlayer);
+
+      startBtn.style.display = "none";
+      resetBtn.style.display = "block";
+      selectPlayer1.style.display = "none";
+      selectPlayer2.style.display = "none";
+      firstPlayerLabel.style.display = "none";
+      secondPlayerLabel.style.display = "none";
+    } else {
+      alert("Please make sure that both player's name was entered!");
+    }
+  }
 
   const resetGame = () => {
-    resetPlayerTurn();
+    switchPlayerTurn();
     board.clearBoard();
     displayController.redrawBoard();
-    displayController.alertEndGame(false, false, true);
-    printRoundMessage();
   };
 
   const checkWinCondition = (playerSymbol, board) => {
-    let isWin = false;
-    const totalCol = board.getColumn();
     const boardWithValues = board.getBoardWithValues();
+    const totalCol = board.getColumn();
 
     const compareSymbol = (value) => value === playerSymbol;
 
-    /* Check for each cell in a row. Use every */
+    /* Check for each cell in a row */
     function checkRow() {
       for (let row of boardWithValues) {
         if (row.every(compareSymbol)) return true;
-        // else return false;
       }
     }
 
@@ -179,7 +174,6 @@ function GameController(playerOneName, playerTwoName) {
         });
 
         if (col.every(compareSymbol)) return true;
-        // else return false;
       }
     }
 
@@ -188,7 +182,7 @@ function GameController(playerOneName, playerTwoName) {
       // Diagonal from top left to bottom right
       const isLinearTrue = boardWithValues
         .map(function (cell, index) {
-          return cell[index]; // index increase for each subsequence loop
+          return cell[index];
         })
         .every(compareSymbol);
 
@@ -203,57 +197,57 @@ function GameController(playerOneName, playerTwoName) {
       if (isLinearTrue || isReverseTrue) return true;
     }
 
-    if (checkRow() || checkColumn() || checkDiagonal()) isWin = true;
-
-    return isWin;
+    if (checkRow() || checkColumn() || checkDiagonal()) {
+      alert(activePlayer.name + " has won the match");
+      return true;
+    };
   };
 
-  const playGame = (inputRow, inputCol) => {
-    numberOfPlacement++;
-    board.placeSymbol(activePlayer.symbol, inputRow, inputCol);
-    let winCondition = checkWinCondition(activePlayer.symbol, board);
+  const playGame = (row, col) => {
+    const isSymbolPlaced = board.placeSymbol(activePlayer.symbol, row, col);
+    if (isSymbolPlaced) {
+      numberOfPlacement++;
+      // increase row and column by 1 because HTML table row and column index begin with 1
+      displayController.insertPlayerSymbol(row + 1, col + 1, activePlayer.symbol);
+    }
 
     // Check win condition
-    if (winCondition) {
-      board.printBoard();
+    if (checkWinCondition(activePlayer.symbol, board)) {
+      board.clearBoard();
       activePlayer.giveScore();
-      displayController.alertEndGame(true, false, false);
       displayController.redrawBoard();
+      numberOfPlacement = 0;
     } else {
       switchPlayerTurn();
-      printRoundMessage();
     }
 
     // Check tie condition
     if (numberOfPlacement >= board.getMaxPlacement()) {
       resetGame();
-      displayController.alertEndGame(false, true, false);
-      displayController.redrawBoard();
+      numberOfPlacement = 0;
+      alert("The game is tie. The game will reset");
     }
   };
 
-  function addEventToGridItems() {
+  (function addPlayGameEventToCells() {
     const cells = document.querySelectorAll("td");
     cells.forEach((cell) => {
       cell.addEventListener("click", function () {
-        displayController.insertPlayerSymbol(cell, activePlayer.symbol);
         playGame(cell.closest("tr").rowIndex, cell.cellIndex);
       });
     });
-  }
+  })();
 
-  function resetButtonEventHandler() {
-    const resetButton = document.querySelector("#reset-button");
-    resetButton.addEventListener("click", function () {
+  (function resetButtonEventHandler() {
+    const resetBtn = document.querySelector("#reset-button");
+    resetBtn.addEventListener("click", function () {
       resetGame();
     });
-  }
+  })();
 
-  addEventToGridItems();
-  resetButtonEventHandler();
-  printRoundMessage();
+  startBtn.addEventListener("click", startGame);
 
-  return { getCurrentPlayer, playGame, resetGame, resetButtonEventHandler };
+  return { playGame, resetGame };
 }
 
-const game = GameController("Minh", "BOT");
+GameController();
